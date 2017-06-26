@@ -93,6 +93,9 @@ class SpectraConvolution():
         self.struct_of_peaks = dict()
         self.loadData()
 
+        self.fig = []
+        self.ax = []
+
     def load_data(self):
         data = pickle.load(open('data.pkl', 'rb'))
         xData = data[0]
@@ -159,6 +162,32 @@ class SpectraConvolution():
         return out
 
 
+    def setup_axes(self):
+        self.fig, self.ax = plt.subplots(figsize=(7, 5))
+        self.ax.plot(self.src.x, self.src.y, label='experiment')
+        self.ax = plt.gca()
+        self.ax.grid(True, which='both')
+
+        self.ax.axhline(y=0, color='k')
+        self.ax.axvline(x=0, color='k')
+
+    def plot_structure(self):
+        self.setup_axes()
+
+        for i in self.struct_of_peaks:
+            current_peak = self.struct_of_peaks[i]
+            y = current_peak['intensity']
+            par = current_peak['params']
+
+            if current_peak['line shape'] == 'GL':
+                label_txt = '{0}: GL' + '({0},{1:1.3f},{2:1.3f})'.format(par.values[0], par.values[1], par.values[2])
+
+            self.ax.plot(self.fit.x, y, l=label_txt)
+
+
+
+        plt.legend()
+        plt.show()
 
 
 
