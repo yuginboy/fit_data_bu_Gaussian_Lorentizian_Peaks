@@ -1,0 +1,8 @@
+0 degree:
+Mono 300W;C(0.5*25mm)-A2mm;AsRecieved;Sample: Al2O3-Mo(200A)-Au(200A)-Co(15A)-Au(3A)-MgO(50A);
+Sample Area eq 10x10mm;P=3.7e-10mbar;
+during BakeOut [20-23.05.2016] sample was in LoadLock Chamber.;after 1 week waiting for a chiller reparing;
+Lens Mode = Transmission
+60 degree:
+Mono 300W;C(0.5*25mm)-A2mm;AsRecieved;Sample: Al2O3-Mo(200A)-Au(200A)-Co(15A)-Au(3A)-MgO(50A);Sample Area eq 10x10mm;
+Lens Mode = Transmission

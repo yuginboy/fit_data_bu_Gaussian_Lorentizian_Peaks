@@ -1,0 +1,6 @@
+Mono 300W;C(0.5*25mm)-A2mm;AsRecieved;Sample: Al2O3-Mo(200A)-Au(200A)-Co(15A)-MgO(40A)-Au(3A)?;Sample Area eq 5x10mm;P=7.3e-9mbar;
+Lens Mode = Transmission
+Sum of 45 spectra in column containing 1015 scans
+2016-09-01_s1614_point=1_0deg_mono300w_asrecieved_srv_pe200_iters_data.vms
+g:\dla pini\kinga-elettra-test-uzas\ifpan\for-article\2016-09-13_s1614_point=1_0deg_mono300w_asrecieved_srv_pe200_iter=45.vms
+Total Acqu Time: 7900 mins 5 sec
