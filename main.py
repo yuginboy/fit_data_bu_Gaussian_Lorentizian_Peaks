@@ -4,7 +4,8 @@
 * License: this code is in GPL license
 * Last modified: 2017-06-23
 '''
-
+from PyAstronomy import pyasl
+from scipy.stats import signaltonoise
 import numpy as np
 import pickle  # for loading pickled test data
 import matplotlib
@@ -191,55 +192,83 @@ class SpectraConvolution():
 
 
 
-# function for genetic algorithm to minimize (sum of squared error)
-# bounds on parameters are set in generate_Initial_Parameters() below
-def sumOfSquaredError(parameterTuple):
-    warnings.filterwarnings("ignore")  # do not print warnings by genetic algorithm
-    return np.sum((yData - double_Lorentz(xData, *parameterTuple)) ** 2)
-
-
-def generate_Initial_Parameters():
-    # min and max used for bounds
-    maxX = max(xData)
-    minX = min(xData)
-    maxY = max(yData)
-    minY = min(yData)
-
-    parameterBounds = []
-    parameterBounds.append([-1.0, 1.0])  # parameter bounds for a
-    parameterBounds.append([maxY / -2.0, maxY / 2.0])  # parameter bounds for b
-    parameterBounds.append([0.0, maxY * 100.0])  # parameter bounds for A
-    parameterBounds.append([0.0, maxY / 2.0])  # parameter bounds for w
-    parameterBounds.append([minX, maxX])  # parameter bounds for x_0
-    parameterBounds.append([0.0, maxY * 100.0])  # parameter bounds for A1
-    parameterBounds.append([0.0, maxY / 2.0])  # parameter bounds for w1
-    parameterBounds.append([minX, maxX])  # parameter bounds for x_01
-
-    # "seed" the numpy random number generator for repeatable results
-    result = differential_evolution(sumOfSquaredError, parameterBounds, seed=3)
-    return result.x
-
-
-# load the pickled test data from original Raman spectroscopy
-data = pickle.load(open('data.pkl', 'rb'))
-xData = data[0]
-yData = data[1]
-
-# generate initial parameter values
-initialParameters = generate_Initial_Parameters()
-
-# curve fit the test data
-fittedParameters, niepewnosci = curve_fit(double_Lorentz, xData, yData, initialParameters)
-
-# create values for display of fitted peak function
-a, b, A, w, x_0, A1, w1, x_01 = fittedParameters
-y_fit = double_Lorentz(xData, a, b, A, w, x_0, A1, w1, x_01)
-
-plt.plot(xData, yData)  # plot the raw data
-plt.plot(xData, y_fit)  # plot the equation using the fitted parameters
-plt.show()
-
-print(fittedParameters)
+# # function for genetic algorithm to minimize (sum of squared error)
+# # bounds on parameters are set in generate_Initial_Parameters() below
+# def sumOfSquaredError(parameterTuple):
+#     warnings.filterwarnings("ignore")  # do not print warnings by genetic algorithm
+#     return np.sum((yData - double_Lorentz(xData, *parameterTuple)) ** 2)
+#
+#
+# def generate_Initial_Parameters():
+#     # min and max used for bounds
+#     maxX = max(xData)
+#     minX = min(xData)
+#     maxY = max(yData)
+#     minY = min(yData)
+#
+#     parameterBounds = []
+#     parameterBounds.append([-1.0, 1.0])  # parameter bounds for a
+#     parameterBounds.append([maxY / -2.0, maxY / 2.0])  # parameter bounds for b
+#     parameterBounds.append([0.0, maxY * 100.0])  # parameter bounds for A
+#     parameterBounds.append([0.0, maxY / 2.0])  # parameter bounds for w
+#     parameterBounds.append([minX, maxX])  # parameter bounds for x_0
+#     parameterBounds.append([0.0, maxY * 100.0])  # parameter bounds for A1
+#     parameterBounds.append([0.0, maxY / 2.0])  # parameter bounds for w1
+#     parameterBounds.append([minX, maxX])  # parameter bounds for x_01
+#
+#     # "seed" the numpy random number generator for repeatable results
+#     result = differential_evolution(sumOfSquaredError, parameterBounds, seed=3)
+#     return result.x
+#
+#
+# # load the pickled test data from original Raman spectroscopy
+# data = pickle.load(open('data.pkl', 'rb'))
+# xData = data[0]
+# yData = data[1]
+#
+# # generate initial parameter values
+# initialParameters = generate_Initial_Parameters()
+#
+# # curve fit the test data
+# fittedParameters, niepewnosci = curve_fit(double_Lorentz, xData, yData, initialParameters)
+#
+# # create values for display of fitted peak function
+# a, b, A, w, x_0, A1, w1, x_01 = fittedParameters
+# y_fit = double_Lorentz(xData, a, b, A, w, x_0, A1, w1, x_01)
+#
+# plt.plot(xData, yData)  # plot the raw data
+# plt.plot(xData, y_fit)  # plot the equation using the fitted parameters
+# plt.show()
+#
+# print(fittedParameters)
 
 if __name__ == '__main__':
     print('-> you run ', __file__, ' file in a main mode')
+
+    # Number of data points
+    N = 10000
+    # Signal to noise ratio
+    SNR = 50.0
+
+    # Create some data with noise and a sinusoidal
+    # variation.
+    x = np.arange(N)
+    y_n = np.random.normal(0.0, 1.0/SNR, N) + 1.0
+    y_s = np.sin(x/500.0*2.*np.pi)*0.1
+    y = y_s + y_n
+
+    Pn = np.sum(y_n ** 2) / len(y_n)
+    Ps = np.sum(y_s ** 2) / len(y_s)
+    snr = -20 * np.log10(Ps / Pn)
+
+    # Estimate the signal to noise ratio. Check whether the
+    # estimate fits the input...
+    # Use a chunk length of 20 data points, a polynomial of degree
+    # one, and produce a "control plot".
+    snrEsti = pyasl.estimateSNR(x, y, 20, deg=1, controlPlot=True)
+    print("Estimate of the SNR: ", snrEsti["SNR-Estimate"])
+
+    # Use a chunks with a length of 27, a polynomial of degree
+    # two, and produce a "control plot".
+    snrEsti = pyasl.estimateSNR(x, y, 27, deg=2, controlPlot=False, xlenMode="excerpt")
+    print("Estimate of the SNR: ", snrEsti["SNR-Estimate"])
